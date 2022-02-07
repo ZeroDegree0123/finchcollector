@@ -21,11 +21,11 @@ class FinchCreate(CreateView):
     model = Finch
     fields = '__all__'
 
-class FinchCreate(UpdateView):
+class FinchUpdate(UpdateView):
     model = Finch
     fields = ['breed', 'description', 'age']
 
-class FinchCreate(DeleteView):
+class FinchDelete(DeleteView):
     model = Finch
     success_url = '/finches/'
     
