@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from .models import Finch
+from django.views.generic import ListView, DetailView
+from .models import Finch, Seed
 from .forms import FeedingForm
 # Create your views here.
 
@@ -17,14 +18,17 @@ def finches_index(request):
 def finches_detail(request, finch_id):
     finch = Finch.objects.get(id=finch_id)
     feeding_form = FeedingForm()
+    seeds_ids = finch.seeds.all().values_list('id')
+    seeds = Seed.objects.exclude(id__in=seeds_ids)
     return render(request, 'finches/detail.html', {
-         'finch': finch,
-          'feeding_form': feeding_form 
+        'finch': finch,
+        'feeding_form': feeding_form,
+        'seeds': seeds 
     })
 
 class FinchCreate(CreateView):
     model = Finch
-    fields = '__all__'
+    fields = ['name', 'breed', 'description', 'age']
 
 class FinchUpdate(UpdateView):
     model = Finch
@@ -42,10 +46,31 @@ def add_feeding(request, finch_id):
         new_feeding.save()
     return redirect('detail', finch_id=finch_id)   
 
+class SeedList(ListView):
+  model = Seed
 
+class SeedDetail(DetailView):
+  model = Seed
 
+class SeedCreate(CreateView):
+  model = Seed
+  fields = '__all__'
 
+class SeedUpdate(UpdateView):
+  model = Seed
+  fields = ['name', 'price']
 
+class SeedDelete(DeleteView):
+  model = Seed
+  success_url = '/seeds/'
+
+def assoc_seed(request, finch_id, seed_id):
+    Finch.objects.get(id=finch_id).seeds.add(seed_id)
+    return redirect('detail', finch_id=finch_id)
+    
+def unassoc_seed(request, finch_id, seed_id):
+    Finch.objects.get(id=finch_id).seeds.remove(seed_id)
+    return redirect('detail', finch_id=finch_id)
 
 
 
